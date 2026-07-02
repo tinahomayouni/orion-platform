@@ -14,12 +14,12 @@ import { UserModule } from './user/user.module';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         host: config.get<string>('DB_HOST'),
-        port: config.get<number>('DB_PORT'),
+        port: Number(config.get<string>('DB_PORT')),
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         entities: [User],
-        synchronize: true, // dev only — use migrations in production
+        synchronize: true,
       }),
     }),
     UserModule
