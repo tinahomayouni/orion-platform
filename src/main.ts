@@ -5,19 +5,13 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
-  // HTTP (Swagger + REST API)
+  // HTTP (Swagger)
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const config = new DocumentBuilder()
-    .setTitle('Auth RBAC API')
-    .setVersion('1.0')
+    .setTitle('API')
     .addBearerAuth()
     .build();
 
