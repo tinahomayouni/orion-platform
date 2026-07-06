@@ -25,6 +25,9 @@ export class User {
   @Column({ default: true })
   isActive: boolean
 
+  @Column({ type: 'text', nullable: true })
+  hashedRefreshToken: string | null;
+
   @Column({ default: new Date() })
   createdAt: Date
 
