@@ -1,31 +1,41 @@
-import { Transport } from "@nestjs/microservices";
-import { AppModule } from "./app.module";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { NestFactory } from "@nestjs/core";
-import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from '@nestjs/core';
+import { Transport } from '@nestjs/microservices';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  // HTTP (Swagger)
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
-  const config = new DocumentBuilder()
-    .setTitle('API')
-    .addBearerAuth()
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-
-  await app.listen(3000);
-
-  // Microservice (TCP)
-  const microservice = await NestFactory.createMicroservice(AppModule, {
+  app.connectMicroservice({
     transport: Transport.TCP,
+    options: {
+      host: '127.0.0.1',
+      port: 8877,
+    },
   });
 
-  await microservice.listen();
-}
+  const config = new DocumentBuilder()
+  .setTitle('API')
+  .setDescription('Auth RBAC System')
+  .setVersion('1.0')
+  .addBearerAuth()
+  .build();
 
+const document = SwaggerModule.createDocument(app, config);
+SwaggerModule.setup('api', app, document);
+
+  await app.startAllMicroservices();
+  await app.listen(3000);
+
+  console.log('HTTP: http://localhost:3000');
+  console.log('Swagger: http://localhost:3000/api');
+}
 bootstrap();
