@@ -28,7 +28,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "start:news": "concurrently -k -n collected,score,score-upd,ai,collector -c blue,magenta,cyan,green,yellow \"npm:start:news-collected:dev\" \"npm:start:score-service:dev\" \"npm:start:score-updated:dev\" \"npm:start:ai-analyser:dev\" \"npm:start:news-collector:dev\""
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -71,6 +72,7 @@
     "@types/node": "^24.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^7.0.0",
+    "concurrently": "^10.0.4",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
