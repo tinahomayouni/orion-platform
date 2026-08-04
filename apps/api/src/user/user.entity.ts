@@ -1,4 +1,4 @@
-import { Role } from 'src/auth/enums/role.enum';
+import { Role } from '../auth/enums/role.enum';
 import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 import {Exclude} from 'class-transformer';
 
