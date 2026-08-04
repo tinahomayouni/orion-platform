@@ -1,5 +1,7 @@
 export * from './enums/news.enums';
+export * from './enums/analysis-asset.enum';
 export * from './constants/queues';
+export * from './constants/analysis-asset-keywords';
 export * from './dto/raw-news-item.dto';
 export * from './dto/news-collected.dto';
 export * from './dto/score-updated.dto';

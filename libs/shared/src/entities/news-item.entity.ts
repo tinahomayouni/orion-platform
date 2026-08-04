@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { AnalysisAsset } from '../enums/analysis-asset.enum';
 import { NewsSource, ProcessingStatus, SourceImpact } from '../enums/news.enums';
 
 @Entity('news_items')
@@ -41,6 +42,13 @@ export class NewsItemEntity {
 
   @Column({ type: 'jsonb', default: () => "'{}'" })
   scoreBreakdown: Record<string, unknown>;
+
+  /** Matched AnalysisAsset values from the enabled ANALYSIS_ASSETS set. */
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  assets: AnalysisAsset[];
+
+  @Column({ type: 'boolean', default: false })
+  relevant: boolean;
 
   @Column({ type: 'varchar', nullable: true })
   sentiment?: string;

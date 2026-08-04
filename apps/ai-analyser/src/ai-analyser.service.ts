@@ -28,6 +28,8 @@ export class AiAnalyserService {
     await this.repo.update(
       { id: item.id },
       {
+        assets: result.assets as any,
+        relevant: result.relevant,
         sentiment: result.sentiment,
         analysisSummary: result.analysisSummary,
         finalScore: result.finalScore,
@@ -38,7 +40,7 @@ export class AiAnalyserService {
     const payload: NewsAnalyzedDto = { ...item, ...result };
     await this.rabbitmq.publish(QUEUES.NEWS_ANALYZED, payload);
     this.logger.log(
-      `Analyzed ${item.id}: ${result.sentiment} final=${result.finalScore}`,
+      `Analyzed ${item.id}: relevant=${result.relevant} assets=[${result.assets.join(',')}] ${result.sentiment} final=${result.finalScore}`,
     );
   }
 }
