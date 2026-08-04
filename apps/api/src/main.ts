@@ -7,6 +7,11 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -23,14 +28,14 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-  .setTitle('API')
-  .setDescription('Auth RBAC System')
-  .setVersion('1.0')
-  .addBearerAuth()
-  .build();
+    .setTitle('Orion API')
+    .setDescription('Auth + News analytics')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
 
-const document = SwaggerModule.createDocument(app, config);
-SwaggerModule.setup('api', app, document);
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   await app.startAllMicroservices();
   await app.listen(3000);

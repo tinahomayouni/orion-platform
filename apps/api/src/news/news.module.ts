@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { NewsItemEntity } from '@app/shared';
+import { NewsController } from './news.controller';
+import { NewsService } from './news.service';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([NewsItemEntity])],
+  controllers: [NewsController],
+  providers: [NewsService],
+})
+export class NewsModule {}
