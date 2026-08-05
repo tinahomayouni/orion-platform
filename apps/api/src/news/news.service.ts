@@ -43,6 +43,15 @@ export class NewsService {
       qb.andWhere('n.title ILIKE :q', { q: `%${query.q.trim()}%` });
     }
 
+    if (query.day?.trim()) {
+      const raw = query.day.trim().toLowerCase();
+      if (raw === 'today') {
+        qb.andWhere(`n."publishedAt"::date = CURRENT_DATE`);
+      } else {
+        qb.andWhere(`n."publishedAt"::date = :day::date`, { day: raw });
+      }
+    }
+
     const [items, total] = await qb.getManyAndCount();
 
     return {

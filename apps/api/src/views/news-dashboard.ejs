@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orion News Dashboard</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4d;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --accent: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+    h1 { margin: 0 0 .25rem; font-size: 1.5rem; }
+    .sub { color: var(--muted); margin-bottom: 1.5rem; font-size: .9rem; }
+    .links { margin-bottom: 1.5rem; }
+    .links a {
+      color: var(--accent);
+      margin-left: 1rem;
+      text-decoration: none;
+      font-size: .85rem;
+    }
+    .links a:hover { text-decoration: underline; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .card h2 { margin: 0 0 1rem; font-size: 1rem; color: var(--muted); }
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: .75rem;
+      align-items: end;
+    }
+    label { display: block; font-size: .75rem; color: var(--muted); margin-bottom: .25rem; }
+    input, select, button {
+      width: 100%;
+      padding: .5rem .65rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: .875rem;
+    }
+    button {
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { filter: brightness(1.1); }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th, td {
+      text-align: right;
+      padding: .6rem .5rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; }
+    .badge {
+      display: inline-block;
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .badge-bullish { background: rgba(34,197,94,.2); color: var(--green); }
+    .badge-bearish { background: rgba(239,68,68,.2); color: var(--red); }
+    .badge-neutral { background: rgba(234,179,8,.2); color: var(--yellow); }
+    .badge-unknown { background: rgba(139,156,179,.2); color: var(--muted); }
+    .score { font-weight: 700; color: var(--accent); }
+    .meta { color: var(--muted); font-size: .85rem; margin-top: .75rem; }
+    .chart-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .chart-block { flex: 1; min-width: 280px; }
+    .bar-wrap { margin: .4rem 0; }
+    .bar-label { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: .2rem; }
+    .bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+    .series-table td:first-child { font-family: monospace; font-size: .75rem; }
+    pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .75rem;
+      overflow: auto;
+      font-size: .75rem;
+      max-height: 200px;
+      direction: ltr;
+      text-align: left;
+    }
+    .empty { color: var(--muted); padding: 2rem; text-align: center; }
+    .title-cell { max-width: 320px; }
+    .title-cell a { color: var(--text); text-decoration: none; }
+    .title-cell a:hover { color: var(--accent); }
+    .assets { font-size: .75rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Orion News Dashboard</h1>
+    <p class="sub">صفحه EJS برای دیدن خروجی APIهای خبر — داده از همان سرویس‌های backend خوانده می‌شود.</p>
+
+    <div class="links">
+      <a href="/api" target="_blank">Swagger</a>
+      <a href="/news" target="_blank">GET /news (JSON)</a>
+      <a href="/news/analytics/chart" target="_blank">GET /news/analytics/chart</a>
+    </div>
+
+    <div class="card">
+      <h2>فیلترها</h2>
+      <form method="get" action="/">
+        <div class="filters">
+          <div>
+            <label>دارایی (asset)</label>
+            <select name="asset">
+              <option value="">همه</option>
+              <% assets.forEach(function(a) { %>
+                <option value="<%= a %>" <%= filters.asset === a ? 'selected' : '' %>><%= a %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label>احساس (sentiment)</label>
+            <select name="sentiment">
+              <option value="">همه</option>
+              <% sentiments.forEach(function(s) { %>
+                <option value="<%= s %>" <%= filters.sentiment === s ? 'selected' : '' %>><%= s %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label>منبع (source)</label>
+            <select name="source">
+              <option value="">همه</option>
+              <% sources.forEach(function(s) { %>
+                <option value="<%= s %>" <%= filters.source === s ? 'selected' : '' %>><%= s %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label>روز رویداد (publishedAt)</label>
+            <select name="day">
+              <option value="today" <%= filters.day === 'today' ? 'selected' : '' %>>امروز</option>
+              <option value="" <%= filters.day === '' ? 'selected' : '' %>>همهٔ هفته</option>
+              <option value="<%= todayIso %>" <%= filters.day === todayIso ? 'selected' : '' %>><%= todayIso %></option>
+            </select>
+          </div>
+          <div>
+            <label>جستجو (q)</label>
+            <input type="text" name="q" value="<%= filters.q %>" placeholder="عنوان..." />
+          </div>
+          <div>
+            <label>صفحه</label>
+            <input type="number" name="page" min="1" value="<%= filters.page %>" />
+          </div>
+          <div>
+            <label>تعداد</label>
+            <input type="number" name="limit" min="1" max="100" value="<%= filters.limit %>" />
+          </div>
+          <div>
+            <label>روزهای نمودار</label>
+            <input type="number" name="days" min="1" max="90" value="<%= filters.days %>" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button type="submit">اعمال</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>نمودار تحلیلی — GET /news/analytics/chart</h2>
+      <div class="chart-row">
+        <div class="chart-block">
+          <strong style="font-size:.85rem">توزیع sentiment</strong>
+          <% if (chart.sentimentBreakdown.length === 0) { %>
+            <p class="empty">داده‌ای نیست</p>
+          <% } else {
+            var maxSent = Math.max.apply(null, chart.sentimentBreakdown.map(function(x){ return x.count; }));
+          %>
+            <% chart.sentimentBreakdown.forEach(function(row) { %>
+              <div class="bar-wrap">
+                <div class="bar-label">
+                  <span><%= row.sentiment %></span>
+                  <span><%= row.count %></span>
+                </div>
+                <div class="bar">
+                  <div class="bar-fill" style="width: <%= maxSent ? (row.count / maxSent * 100) : 0 %>%"></div>
+                </div>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+        <div class="chart-block">
+          <strong style="font-size:.85rem">سری زمانی (<%= chart.groupBy %>)</strong>
+          <% if (chart.series.length === 0) { %>
+            <p class="empty">داده‌ای نیست</p>
+          <% } else { %>
+            <table class="series-table">
+              <thead>
+                <tr><th>زمان</th><th>تعداد</th><th>میانگین score</th><th>میانگین final</th></tr>
+              </thead>
+              <tbody>
+                <% chart.series.forEach(function(row) { %>
+                  <tr>
+                    <td><%= new Date(row.bucket).toLocaleString('fa-IR') %></td>
+                    <td><%= row.count %></td>
+                    <td><%= row.avgScore %></td>
+                    <td class="score"><%= row.avgFinalScore %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>لیست اخبار — GET /news</h2>
+      <% if (list.items.length === 0) { %>
+        <p class="empty">خبری پیدا نشد. pipeline را با <code>npm run start:news</code> اجرا کن.</p>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>عنوان</th>
+              <th>منبع</th>
+              <th>دارایی‌ها</th>
+              <th>sentiment</th>
+              <th>score</th>
+              <th>final</th>
+              <th>تاریخ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% list.items.forEach(function(item) {
+              var sentClass = 'badge-unknown';
+              if (item.sentiment === 'bullish') sentClass = 'badge-bullish';
+              else if (item.sentiment === 'bearish') sentClass = 'badge-bearish';
+              else if (item.sentiment === 'neutral') sentClass = 'badge-neutral';
+            %>
+              <tr>
+                <td class="title-cell">
+                  <a href="<%= item.url %>" target="_blank" rel="noopener"><%= item.title %></a>
+                  <% if (item.relevant === false) { %><br><span class="assets">غیرمرتبط</span><% } %>
+                </td>
+                <td><%= item.source %></td>
+                <td class="assets"><%= (item.assets || []).join(', ') || '—' %></td>
+                <td><span class="badge <%= sentClass %>"><%= item.sentiment || '—' %></span></td>
+                <td><%= item.score %></td>
+                <td class="score"><%= item.finalScore %></td>
+                <td><%= new Date(item.publishedAt).toLocaleString('fa-IR') %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <p class="meta">
+          روز: <%= filters.day || 'همه' %> —
+          صفحه <%= list.meta.page %> از <%= list.meta.totalPages %>
+          — <%= list.meta.total %> خبر
+          <% if (list.meta.page > 1) { %>
+            | <a href="/?page=<%= list.meta.page - 1 %>&limit=<%= filters.limit %>&asset=<%= filters.asset %>&sentiment=<%= filters.sentiment %>&source=<%= filters.source %>&q=<%= filters.q %>&days=<%= filters.days %>&day=<%= filters.day %>">قبلی</a>
+          <% } %>
+          <% if (list.meta.page < list.meta.totalPages) { %>
+            | <a href="/?page=<%= list.meta.page + 1 %>&limit=<%= filters.limit %>&asset=<%= filters.asset %>&sentiment=<%= filters.sentiment %>&source=<%= filters.source %>&q=<%= filters.q %>&days=<%= filters.days %>&day=<%= filters.day %>">بعدی</a>
+          <% } %>
+        </p>
+      <% } %>
+    </div>
+
+    <div class="card">
+      <h2>Raw JSON (برای دیباگ فرانت)</h2>
+      <details>
+        <summary style="cursor:pointer;color:var(--accent)">list response</summary>
+        <pre><%= JSON.stringify(list, null, 2) %></pre>
+      </details>
+      <details style="margin-top:.75rem">
+        <summary style="cursor:pointer;color:var(--accent)">chart response</summary>
+        <pre><%= JSON.stringify(chart, null, 2) %></pre>
+      </details>
+    </div>
+  </div>
+</body>
+</html>

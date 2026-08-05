@@ -54,4 +54,10 @@ export class QueryNewsDto {
   @IsOptional()
   @IsString()
   q?: string;
+
+  /** Filter by calendar day of publishedAt (YYYY-MM-DD). Use "today" for local today. */
+  @ApiPropertyOptional({ example: 'today' })
+  @IsOptional()
+  @IsString()
+  day?: string;
 }

@@ -20,7 +20,6 @@ export class NewsCollectorService {
     await this.collect();
   }
 
-  /** Also exposed for a one-shot run at boot / manual trigger. */
   async collect() {
     if (this.running) {
       this.logger.warn('Collection already in progress — skipping');
@@ -33,7 +32,8 @@ export class NewsCollectorService {
         this.investor.fetch(),
       ]);
 
-      for (const item of ff) {
+      // Only publish NEW / CHANGED items — re-sending the same 99 does nothing useful.
+      for (const item of ff.delta) {
         await this.rabbitmq.publish(QUEUES.RAW_FOREXFACTORY, item);
       }
       for (const item of inv) {
@@ -41,8 +41,15 @@ export class NewsCollectorService {
       }
 
       this.logger.log(
-        `Published ${ff.length} ForexFactory + ${inv.length} Investor items`,
+        `Collect done source=${ff.source} ffTotal=${ff.items.length} ` +
+          `ffPublishedDelta=${ff.delta.length} investor=${inv.length}`,
       );
+
+      if (ff.source !== 'live' && ff.delta.length === 0) {
+        this.logger.warn(
+          'No live FF data and no unseen cache items — DB row count will stay the same until the calendar API allows a live fetch (HTTP 429 cooldown).',
+        );
+      }
     } finally {
       this.running = false;
     }

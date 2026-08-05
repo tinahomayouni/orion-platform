@@ -5,6 +5,7 @@ import { NewsItemEntity } from '@app/shared';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 import { NewsModule } from './news/news.module';
+import { ViewsModule } from './views/views.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { NewsModule } from './news/news.module';
     }),
     UserModule,
     NewsModule,
+    ViewsModule,
   ],
 })
 export class AppModule {}
